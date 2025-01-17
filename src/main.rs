@@ -17,6 +17,7 @@ impl InventoryActions {
             .expect("Unable to read line");
 
         // capture quantity
+        println!("Enter a quantity:");
         let mut new_quanity = String::new();
         let new_quantity_number: u16;
 
@@ -57,24 +58,66 @@ impl InventoryActions {
         }
 
         items.push(Item {
-            name: new_name,
+            name: String::from(new_name.trim()),
             quantity: new_quantity_number,
             price: new_price_float,
         });
     }
+
     fn remove(items: &mut Vec<Item>) {
+        if items.is_empty() {
+            println!("There are no items in the list");
+        }
+
         for (id, item) in items.iter().enumerate() {
             println!("{}. {}", id, item.name);
         }
+
+        let mut index_to_remove = String::new();
+        let mut index_to_remove_num: usize;
+
+        loop {
+            println!("Enter the id of the item that you would like to remove");
+            index_to_remove.clear();
+
+            io::stdin()
+                .read_line(&mut index_to_remove)
+                .expect("Unable to read line");
+
+            index_to_remove_num = match index_to_remove.trim().parse() {
+                Ok(num) => num,
+                Err(_) => {
+                    println!("Please enter a valid number");
+                    continue;
+                }
+            };
+
+            if index_to_remove_num < items.len() {
+                break;
+            } else {
+                println!("Enter a number within the range of the list");
+            }
+        }
+
+        println!("removing {}", items[index_to_remove_num].name);
+        items.remove(index_to_remove_num);
     }
-    fn list() {
-        println!("list items");
+
+    fn list(items: &mut Vec<Item>) {
+        if items.is_empty() {
+            println!("There are no items in the list");
+        } else {
+            for (id, item) in items.iter().enumerate() {
+                println!("{}. {}", id, item.name);
+                println!("Price: {}", item.price);
+                println!("Quantity: {}", item.quantity);
+            }
+        }
     }
 }
 fn main() {
     let mut user_input = String::new();
     let mut items: Vec<Item> = vec![];
-    let mut user_input_num: u8;
 
     println!("Welcome to my inventory management program");
 
@@ -103,7 +146,7 @@ fn main() {
         match user_input {
             1 => InventoryActions::add(&mut items),
             2 => InventoryActions::remove(&mut items),
-            3 => InventoryActions::list(),
+            3 => InventoryActions::list(&mut items),
             4 => {
                 println!("Goodbye");
                 break;
